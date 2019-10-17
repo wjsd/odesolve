@@ -12,11 +12,12 @@ Notes:
 """
 import numpy as np
 
+
 def odesolve(times, x0, func, stepfunc):
     """
     odesolve
 
-    Numerically integrate a (non)autonomous ODE.
+    Numerically integrate a (non)autonomous nonlinear ODE.
 
     # TODO: figure out what to put as data type for func and stepfunc docs
 
@@ -36,8 +37,8 @@ def odesolve(times, x0, func, stepfunc):
     xvals[0,:] = x0
     x_n = x0
 
-    for i in range(1,len(deltas)):
-        x_n = stepfunc(times[i-1],deltas[i], x_n, func)
+    for i in range(1,len(deltas)+1):
+        x_n = stepfunc(times[i-1],deltas[i-1], x_n, func)
         xvals[i,:] = x_n
 
     return xvals
@@ -110,7 +111,6 @@ def rk4_step(t,delta,x,func):
 #
 # Functions
 #
-
 def exp_decay(t,x):
     return -x
 
@@ -124,6 +124,7 @@ def linear(t,x):
 def lorenz(t,x):
     return
 
+
 #
 # Run module as program
 #
@@ -131,7 +132,7 @@ def lorenz(t,x):
 def main():
     from matplotlib import pyplot as plt
 
-    times = np.linspace(0,1,2000)
+    times = np.linspace(0,20,20000)
     x0 = np.array([1.])
 
     # exp exp_decay
@@ -162,21 +163,23 @@ def main():
     plt.legend(['true','euler','midpoint','rk4'])
     plt.show()
 
-    # linear
-    x0 = np.random.random((8,2)) - 0.5
+    # linear system
+    n=10
+    x0 = np.random.random((n,2))/2 - 0.25
     for i in range(x0.shape[0]):
         euler_xvals = odesolve(times,x0[i,:],linear,euler_step)
         midpoint_xvals = odesolve(times,x0[i,:],linear,midpoint_step)
         rk4_xvals = odesolve(times,x0[i,:],linear,rk4_step)
 
-        plt.plot(euler_xvals[:,0],euler_xvals[:,1])
-        plt.plot(midpoint_xvals[:,0],midpoint_xvals[:,1])
-        plt.plot(rk4_xvals[:,0],rk4_xvals[:,1])
+        plt.plot(euler_xvals[:,0],euler_xvals[:,1],color='blue')
+        plt.plot(midpoint_xvals[:,0],midpoint_xvals[:,1],color='green')
+        plt.plot(rk4_xvals[:,0],rk4_xvals[:,1],color='red')
     plt.xlabel('x0')
     plt.ylabel('x1')
     plt.legend(['euler','midpoint','rk4'])
     plt.show()
 
 if __name__ == '__main__':
-    A = np.array([[-1,0],[0,1]])
+    # A = np.array([[-1,0],[0,1]]) # saddle
+    A = np.array([[-1.5,2],[-1,1]]) # stable spiral
     main()
