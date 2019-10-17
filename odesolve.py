@@ -121,8 +121,11 @@ def linear(t,x):
         return A.dot(x)
 
 # TODO: lorenz
-def lorenz(t,x):
-    return
+def lorenz(sigma,rho,beta,t,x):
+    dxdt = sigma*(x[1] - x[0])
+    dydt = x[0]*(rho - x[2]) - x[1]
+    dzdt = x[0]*x[1] - beta*x[2]
+    return np.array([dxdt, dydt, dzdt])
 
 
 #
@@ -131,8 +134,12 @@ def lorenz(t,x):
 # TODO: fix strange behavior at last timestep(s?)
 def main():
     from matplotlib import pyplot as plt
+    import matplotlib as mpl
+    from mpl_toolkits.mplot3d import Axes3D
+    import numpy as np
+    import matplotlib.pyplot as plt
 
-    times = np.linspace(0,20,20000)
+    times = np.linspace(0,20,2000)
     x0 = np.array([1.])
 
     # exp exp_decay
@@ -176,6 +183,26 @@ def main():
         plt.plot(rk4_xvals[:,0],rk4_xvals[:,1],color='red')
     plt.xlabel('x0')
     plt.ylabel('x1')
+    plt.legend(['euler','midpoint','rk4'])
+    plt.show()
+
+    # lorenz system
+    fig = plt.figure()
+    ax = fig.gca(projection='3d')
+
+    x0 = np.random.random((n,3))
+    sigma = 10
+    rho = 28
+    beta = 8./3
+    for i in range(x0.shape[0]):
+        euler_xvals = odesolve(times,x0[i,:],lambda t,x: lorenz(sigma,rho,beta,t,x),euler_step)
+        midpoint_xvals = odesolve(times,x0[i,:],lambda t,x: lorenz(sigma,rho,beta,t,x),midpoint_step)
+        rk4_xvals = odesolve(times,x0[i,:],lambda t,x: lorenz(sigma,rho,beta,t,x),rk4_step)
+
+        ax.plot(euler_xvals[:,0],euler_xvals[:,1],euler_xvals[:,2],color='blue')
+        ax.plot(midpoint_xvals[:,0],midpoint_xvals[:,1],midpoint_xvals[:,2],color='green')
+        ax.plot(rk4_xvals[:,0],rk4_xvals[:,1],rk4_xvals[:,2],color='red')
+
     plt.legend(['euler','midpoint','rk4'])
     plt.show()
 
