@@ -262,6 +262,11 @@ def main():
 
     fig = plt.figure()
     ax = Axes3D(fig)
+
+    ax.set_xlim([-4,4])
+    ax.set_ylim([-4,4])
+    ax.set_zlim([-4,4])
+
     lines = [ax.plot(d[0,0:1],d[1,0:1],d[2,0:1])[0] for d in rk4_all]
     anim = animation.FuncAnimation(fig,update,nstep,fargs=(rk4_all,lines),interval=1)
     plt.show()
