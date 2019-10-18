@@ -167,8 +167,8 @@ def main():
     plt.show()
 
     # linear system
-    n=10
-    x0 = np.random.random((n,2))/2 - 0.25
+    n = 42
+    x0 = (np.random.random((n,2)) - 0.5)*4
     for i in range(x0.shape[0]):
         euler_xvals = odesolve(times,x0[i,:],linear,euler_step)
         midpoint_xvals = odesolve(times,x0[i,:],linear,midpoint_step)
@@ -186,11 +186,13 @@ def main():
     fig = plt.figure()
     ax = fig.gca(projection='3d')
 
+    n = 8
     x0 = np.random.random((n,3))
     sigma = 10
     rho = 28
     beta = 8./3
-    for i in range(x0.shape[0]):
+    rk4_all = []
+    for i in range(x0.shape[0]): # find trajectories of each particle
         euler_xvals = odesolve(times,x0[i,:],lambda t,x: lorenz(sigma,rho,beta,t,x),euler_step)
         midpoint_xvals = odesolve(times,x0[i,:],lambda t,x: lorenz(sigma,rho,beta,t,x),midpoint_step)
         rk4_xvals = odesolve(times,x0[i,:],lambda t,x: lorenz(sigma,rho,beta,t,x),rk4_step)
@@ -199,22 +201,23 @@ def main():
         ax.plot(midpoint_xvals[:,0],midpoint_xvals[:,1],midpoint_xvals[:,2],color='green')
         ax.plot(rk4_xvals[:,0],rk4_xvals[:,1],rk4_xvals[:,2],color='red')
 
+        rk4_all += [rk4_xvals.T]
+
     plt.legend(['euler','midpoint','rk4'])
     plt.show()
 
     # lorenz rk4 animation
     def update(frame,linedata,lines):
         for line,data in zip(lines,linedata):
-            print('data.shape =',data.shape)
+            # print('data.shape =',data.shape)
             line.set_data(data[0:2,:frame])
             line.set_3d_properties(data[2,:frame])
         return lines
 
     fig = plt.figure()
     ax = Axes3D(fig)
-    rk4_xvals = [euler_xvals.T,midpoint_xvals.T,rk4_xvals.T]
-    lines = [ax.plot(d[0,0:1],d[1,0:1],d[2,0:1])[0] for d in rk4_xvals]
-    anim = animation.FuncAnimation(fig,update,len(times),fargs=(rk4_xvals,lines),interval=1)
+    lines = [ax.plot(d[0,0:1],d[1,0:1],d[2,0:1])[0] for d in rk4_all]
+    anim = animation.FuncAnimation(fig,update,len(times),fargs=(rk4_all,lines),interval=1)
     plt.show()
 
 if __name__ == '__main__':
