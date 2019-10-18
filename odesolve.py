@@ -120,7 +120,6 @@ def exp_growth(t,x):
 def linear(t,x):
         return A.dot(x)
 
-# TODO: lorenz
 def lorenz(sigma,rho,beta,t,x):
     dxdt = sigma*(x[1] - x[0])
     dydt = x[0]*(rho - x[2]) - x[1]
@@ -131,13 +130,10 @@ def lorenz(sigma,rho,beta,t,x):
 #
 # Run module as program
 #
-# TODO: fix strange behavior at last timestep(s?)
 def main():
     from matplotlib import pyplot as plt
-    import matplotlib as mpl
     from mpl_toolkits.mplot3d import Axes3D
-    import numpy as np
-    import matplotlib.pyplot as plt
+    import matplotlib.animation as animation
 
     times = np.linspace(0,20,2000)
     x0 = np.array([1.])
@@ -204,6 +200,21 @@ def main():
         ax.plot(rk4_xvals[:,0],rk4_xvals[:,1],rk4_xvals[:,2],color='red')
 
     plt.legend(['euler','midpoint','rk4'])
+    plt.show()
+
+    # lorenz rk4 animation
+    def update(frame,linedata,lines):
+        for line,data in zip(lines,linedata):
+            print('data.shape =',data.shape)
+            line.set_data(data[0:2,:frame])
+            line.set_3d_properties(data[2,:frame])
+        return lines
+
+    fig = plt.figure()
+    ax = Axes3D(fig)
+    rk4_xvals = [euler_xvals.T,midpoint_xvals.T,rk4_xvals.T]
+    lines = [ax.plot(d[0,0:1],d[1,0:1],d[2,0:1])[0] for d in rk4_xvals]
+    anim = animation.FuncAnimation(fig,update,len(times),fargs=(rk4_xvals,lines),interval=1)
     plt.show()
 
 if __name__ == '__main__':
