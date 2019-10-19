@@ -25,12 +25,12 @@ def odesolve(times, x0, func, stepfunc):
     -------
     times - (float array) array of times at which we want our solution
     x0 - (float array) initial condition vector
-    func - (function(???)) dynamics function that takes x-vectors as input and outpus x_dot (dx/dt = func(x))
-    stepfunc - (function?) numerical solver step operation (e.g. euler step x_n=(n+1) = x_n + dt*func(x_n))
+    func - (function handle) dynamics function that takes x-vectors as input and outpus x_dot (dx/dt = func(x))
+    stepfunc - (function handle) numerical solver step operation (e.g. euler step x_n=(n+1) = x_n + dt*func(x_n))
 
     outputs
     --------
-    xvals - (list) list of
+    xvals - (numpy array) numpy matrix where first dim is timesteps and second dim is state dimensions
     """
     deltas = times[1:] - times[:-1] # step sizes
     xvals = np.zeros((len(times), len(x0))) # pre-allocate integration results
@@ -54,7 +54,7 @@ def euler_step(t,delta,x,func):
     t - (float) current time
     delta - (float) step size
     x - (float array) current state vector
-    func - (function) dynamics function
+    func - (function handle) dynamics function
 
     outputs
     --------
@@ -109,7 +109,7 @@ def rk4_step(t,delta,x,func):
 
 
 #
-# Functions
+# Misc dynamics functions
 #
 def exp_decay(t,x):
     return -x
@@ -191,7 +191,7 @@ def main():
     fig = plt.figure()
     ax = fig.gca(projection='3d')
 
-    times = np.linspace(0,40,10000)
+    times = np.linspace(0,40,3000)
     n = 42
     x0 = (np.random.random((n,3)) - 0.5)*4
     sigma = 10
@@ -283,12 +283,12 @@ def main():
     scatters = [ax.scatter([],[],[]) for ld in midpoint_all]
 
     anim = animation.FuncAnimation(fig,update,nstep,fargs=(midpoint_all,lines),interval=1,blit=False)
-    plt.show()
+    plt.show() # TODO: fix this. When commented out, no Thomas simulation, but when present, empty figure pops up after Thomas simulation
 
-    Writer = animation.writers['ffmpeg']
-    writer = Writer(fps=15, metadata=dict(artist='Me'), bitrate=1800)
-
-    anim.save('thomas.mp4',writer=Writer)
+    # Writer = animation.writers['ffmpeg']
+    # writer = Writer(fps=15, metadata=dict(artist='Me'), bitrate=1800)
+    #
+    # anim.save('thomas.mp4',writer=Writer)
 
     # TODO: create strange attractor class that takes a type and parameter list
     # TODO: create ODESolver class to solve and visualize/plot/animate solutions
@@ -298,3 +298,4 @@ if __name__ == '__main__':
     # A = np.array([[-1,0],[0,1]]) # saddle
     A = np.array([[-1.5,2],[-1,1]]) # stable spiral
     main()
+    print('[ odesolve.py testing complete ]')

@@ -8,6 +8,10 @@ Class for solving and animating (non)autonomous (non)linear systems of ODEs.
 
 Notes:
 
+- Can be used to solve any nonautonomous nonlinear ODE, but can only plot in 3D
+- If you want to plot a 2D ODE, set dynamics so that z = 0 always. You can also
+  manually set your solution data by using the .set_solutions(sol) method.
+
 """
 import numpy as np
 import matplotlib.pyplot as plt
@@ -87,6 +91,12 @@ class ODESolver():
 
         Animate the ODE.
         """
+        # make sure that solutions can be plotted
+        dims = [s.shape[0] for s in self.solutions]
+        for d in dims:
+            if d != 3:
+                raise Exception('Solutions do not have dimension 3! Cannot animate!')
+
         fig = plt.figure(figsize=(16,16))
         ax = Axes3D(fig)
 
@@ -94,8 +104,6 @@ class ODESolver():
         ax.set_ylim(self.ylim)
         ax.set_zlim(self.zlim)
 
-        # lines = [ax.plot(d[0,0:1],d[1,0:1],d[2,0:1])[0] for d in rk4_all]
-        # anim = animation.FuncAnimation(fig,update,nstep,fargs=(rk4_all,lines),interval=1)
         lines = [ax.plot(ld[0,0:1],ld[1,0:1],ld[2,0:1])[0] for ld in self.solutions]
 
         if self.showparticles:
@@ -117,9 +125,14 @@ class ODESolver():
         update
 
         Update function for animation frames.
+
+        inputs
+        -------
+        frame - (int) current frame value
+        linedata - (list) list of np arrays describing the data for each line
+        lines - (list) list of plot handles
         """
         for line,data in zip(lines,linedata):
-            # print('data.shape =',data.shape)
             if self.tail is not None and frame > self.tail:
                 line.set_data(data[0:2,frame-self.tail:frame])
                 line.set_3d_properties(data[2,frame-self.tail:frame])
@@ -127,22 +140,55 @@ class ODESolver():
                 line.set_data(data[0:2,:frame])
                 line.set_3d_properties(data[2,:frame])
 
+        # display particles desired
         if self.showparticles:
             if frame > 0:
                 for i in range(len(self.scatters)):
                     xdata = self.solutions[i][0,frame-1]
                     ydata = self.solutions[i][1,frame-1]
                     zdata = self.solutions[i][2,frame-1]
-
                     self.scatters[i]._offsets3d = ([xdata],[ydata],[zdata])
 
         return lines
+
+    def set_solutions(self,sol):
+        """
+        set_solutions
+
+        Method to manually set solution arrays. Useful for plotting in 2D or simply animating
+        an ODE after having solved it elsewhere. Throws an exception if dim(sol[i]) != 2
+
+        inputs
+        -------
+        sol - (list) python list of numpy matrices, where each matrix is a D=3 dimensions x N particles
+              solution to the ODE.
+        """
+        dims = [s.shape[0] for s in sol]
+        for d in dims:
+            if d != 3:
+                raise Exception('Solutions do not have dimension 3! Cannot animate!')
+
+        self.solutions = sol
+
+        return
 
 
 #
 # Run as program
 #
 if __name__ == "__main__":
+    # linear
+    times = np.linspace(0,10,500)
+    x0 = (np.random.random((40,3)) - 0.5)*8
+    xlim = [-15,15]
+    ylim=xlim
+    zlim=ylim
+    A = np.array([[-1.,1.,0.],[-1.,-1.,0.],[0.,0.,1.]])
+    dynamics = lambda t,x: A.dot(x)
+    s = ODESolver(times,x0,dynamics,stepfunc=odesolve.rk4_step,xlim=xlim,ylim=ylim,zlim=zlim)
+    solutions = s.solve()
+    a = s.animate()
+
     # thomas
     times = np.linspace(0,40,500)
     x0 = (np.random.random((40,3)) - 0.5)*2
@@ -155,12 +201,14 @@ if __name__ == "__main__":
     a = s.animate()
 
     # lorenz
-    times = np.linspace(0,80,8000)
+    times = np.linspace(0,40,2000)
     x0 = (np.random.random((40,3)) - 0.5)*8
     xlim = [-15,15]
     ylim=xlim
     zlim=ylim
     dynamics = lambda t,x:odesolve.lorenz(10,28,8./3,t,x)
-    s = ODESolver(times,x0,dynamics,stepfunc=odesolve.rk4_step,xlim=xlim,ylim=ylim,zlim=zlim,showparticles=True,blit=False)
+    s = ODESolver(times,x0,dynamics,stepfunc=odesolve.rk4_step,xlim=xlim,ylim=ylim,zlim=zlim,showparticles=False,blit=True)
     solutions = s.solve()
     a = s.animate()
+
+    print('[ ODESolver.py testing complete ]')
