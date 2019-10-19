@@ -80,7 +80,7 @@ class ODESolver():
         """
         self.solutions = []
         for i in range(self.x0.shape[0]): # find trajectories of each particle
-            solution = self.solver(self.times,self.x0[i,:],self.dynamics,self.stepfunc) # M dims
+            solution = self.solver(self.times,self.x0[i,:],self.dynamics,self.stepfunc) # T timesteps x M dims
             self.solutions += [solution.T]
 
         return self.solutions
