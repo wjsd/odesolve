@@ -231,24 +231,24 @@ def main():
     # fig = plt.figure()
     # ax = fig.gca(projection='3d')
 
-    tmax = 64
-    nstep = 1000
+    tmax = 100
+    nstep = 500
     times = np.linspace(0,tmax,nstep)
-    n = 128
+    n = 84
     x0 = (np.random.random((n,3)) - 0.5)/2
     b = 0.2
-    rk4_all = []
+    # rk4_all = []
+    midpoint_all = []
     for i in range(x0.shape[0]): # find trajectories of each particle
-        rk4_xvals = odesolve(times,x0[i,:],lambda t,x: thomas(b,t,x),rk4_step)
+        midpoint_xvals = odesolve(times,x0[i,:],lambda t,x: thomas(b,t,x),midpoint_step)
+        # rk4_xvals = odesolve(times,x0[i,:],lambda t,x: thomas(b,t,x),rk4_step)
         # ax.plot(rk4_xvals[:,0],rk4_xvals[:,1],rk4_xvals[:,2],color='blue')
-        rk4_all += [rk4_xvals.T]
-
-    # plt.legend(['rk4'])
-    # plt.show()
+        # rk4_all += [rk4_xvals.T]
+        midpoint_all += [midpoint_xvals.T]
 
     # lorenz rk4 animation
-    tail = 20
-    usetail = False
+    tail = 30
+    usetail = True
     def update(frame,linedata,lines):
         for line,data in zip(lines,linedata):
             # print('data.shape =',data.shape)
@@ -258,6 +258,15 @@ def main():
             else:
                 line.set_data(data[0:2,:frame])
                 line.set_3d_properties(data[2,:frame])
+
+        if frame > 0:
+            for i in range(len(scatters)):
+                xdata = midpoint_all[i][0,frame-1]
+                ydata = midpoint_all[i][1,frame-1]
+                zdata = midpoint_all[i][2,frame-1]
+
+                scatters[i]._offsets3d = ([xdata],[ydata],[zdata])
+
         return lines
 
     fig = plt.figure()
@@ -267,9 +276,19 @@ def main():
     ax.set_ylim([-4,4])
     ax.set_zlim([-4,4])
 
-    lines = [ax.plot(d[0,0:1],d[1,0:1],d[2,0:1])[0] for d in rk4_all]
-    anim = animation.FuncAnimation(fig,update,nstep,fargs=(rk4_all,lines),interval=1)
+    # lines = [ax.plot(d[0,0:1],d[1,0:1],d[2,0:1])[0] for d in rk4_all]
+    # anim = animation.FuncAnimation(fig,update,nstep,fargs=(rk4_all,lines),interval=1)
+    lines = [ax.plot(ld[0,0:1],ld[1,0:1],ld[2,0:1])[0] for ld in midpoint_all]
+
+    scatters = [ax.scatter([],[],[]) for ld in midpoint_all]
+
+    anim = animation.FuncAnimation(fig,update,nstep,fargs=(midpoint_all,lines),interval=1,blit=False)
     plt.show()
+
+    Writer = animation.writers['ffmpeg']
+    writer = Writer(fps=15, metadata=dict(artist='Me'), bitrate=1800)
+
+    anim.save('thomas.mp4',writer=Writer)
 
     # TODO: create strange attractor class that takes a type and parameter list
     # TODO: create ODESolver class to solve and visualize/plot/animate solutions
