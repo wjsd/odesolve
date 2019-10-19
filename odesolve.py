@@ -231,8 +231,8 @@ def main():
     # fig = plt.figure()
     # ax = fig.gca(projection='3d')
 
-    tmax = 100
-    nstep = 500
+    tmax = 64
+    nstep = 350
     times = np.linspace(0,tmax,nstep)
     n = 84
     x0 = (np.random.random((n,3)) - 0.5)/2
@@ -248,7 +248,7 @@ def main():
 
     # lorenz rk4 animation
     tail = 30
-    usetail = True
+    usetail = False
     def update(frame,linedata,lines):
         for line,data in zip(lines,linedata):
             # print('data.shape =',data.shape)
@@ -292,6 +292,7 @@ def main():
 
     # TODO: create strange attractor class that takes a type and parameter list
     # TODO: create ODESolver class to solve and visualize/plot/animate solutions
+    # TODO: create ODEAnimator class to (optionally) solve an ode and animate it using plot/scatter/tails/etc.
 
 if __name__ == '__main__':
     # A = np.array([[-1,0],[0,1]]) # saddle
