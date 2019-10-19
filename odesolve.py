@@ -187,52 +187,52 @@ def main():
     plt.legend(['euler','midpoint','rk4'])
     plt.show()
 
-    # # lorenz system
-    # fig = plt.figure()
-    # ax = fig.gca(projection='3d')
-    #
-    # times = np.linspace(0,40,10000)
-    # n = 42
-    # x0 = (np.random.random((n,3)) - 0.5)*4
-    # sigma = 10
-    # rho = 28
-    # beta = 8./3
-    # rk4_all = []
-    # for i in range(x0.shape[0]): # find trajectories of each particle
-    #     euler_xvals = odesolve(times,x0[i,:],lambda t,x: lorenz(sigma,rho,beta,t,x),euler_step)
-    #     midpoint_xvals = odesolve(times,x0[i,:],lambda t,x: lorenz(sigma,rho,beta,t,x),midpoint_step)
-    #     rk4_xvals = odesolve(times,x0[i,:],lambda t,x: lorenz(sigma,rho,beta,t,x),rk4_step)
-    #
-    #     ax.plot(euler_xvals[:,0],euler_xvals[:,1],euler_xvals[:,2],color='blue')
-    #     ax.plot(midpoint_xvals[:,0],midpoint_xvals[:,1],midpoint_xvals[:,2],color='green')
-    #     ax.plot(rk4_xvals[:,0],rk4_xvals[:,1],rk4_xvals[:,2],color='red')
-    #
-    #     rk4_all += [rk4_xvals.T]
-    #
-    # plt.legend(['euler','midpoint','rk4'])
-    # plt.show()
-    #
-    # # lorenz rk4 animation
-    # def update(frame,linedata,lines):
-    #     for line,data in zip(lines,linedata):
-    #         # print('data.shape =',data.shape)
-    #         line.set_data(data[0:2,:frame])
-    #         line.set_3d_properties(data[2,:frame])
-    #     return lines
-    #
-    # fig = plt.figure()
-    # ax = Axes3D(fig)
-    # lines = [ax.plot(d[0,0:1],d[1,0:1],d[2,0:1])[0] for d in rk4_all]
-    # anim = animation.FuncAnimation(fig,update,len(times),fargs=(rk4_all,lines),interval=1)
-    # plt.show()
+    # lorenz system
+    fig = plt.figure()
+    ax = fig.gca(projection='3d')
+
+    times = np.linspace(0,40,10000)
+    n = 42
+    x0 = (np.random.random((n,3)) - 0.5)*4
+    sigma = 10
+    rho = 28
+    beta = 8./3
+    rk4_all = []
+    for i in range(x0.shape[0]): # find trajectories of each particle
+        euler_xvals = odesolve(times,x0[i,:],lambda t,x: lorenz(sigma,rho,beta,t,x),euler_step)
+        midpoint_xvals = odesolve(times,x0[i,:],lambda t,x: lorenz(sigma,rho,beta,t,x),midpoint_step)
+        rk4_xvals = odesolve(times,x0[i,:],lambda t,x: lorenz(sigma,rho,beta,t,x),rk4_step)
+
+        ax.plot(euler_xvals[:,0],euler_xvals[:,1],euler_xvals[:,2],color='blue')
+        ax.plot(midpoint_xvals[:,0],midpoint_xvals[:,1],midpoint_xvals[:,2],color='green')
+        ax.plot(rk4_xvals[:,0],rk4_xvals[:,1],rk4_xvals[:,2],color='red')
+
+        rk4_all += [rk4_xvals.T]
+
+    plt.legend(['euler','midpoint','rk4'])
+    plt.show()
+
+    # lorenz rk4 animation
+    def update(frame,linedata,lines):
+        for line,data in zip(lines,linedata):
+            # print('data.shape =',data.shape)
+            line.set_data(data[0:2,:frame])
+            line.set_3d_properties(data[2,:frame])
+        return lines
+
+    fig = plt.figure()
+    ax = Axes3D(fig)
+    lines = [ax.plot(d[0,0:1],d[1,0:1],d[2,0:1])[0] for d in rk4_all]
+    anim = animation.FuncAnimation(fig,update,len(times),fargs=(rk4_all,lines),interval=1)
+    plt.show()
 
 
     # thomas attractor
-    # fig = plt.figure()
-    # ax = fig.gca(projection='3d')
+    fig = plt.figure()
+    ax = fig.gca(projection='3d')
 
-    tmax = 64
-    nstep = 350
+    tmax = 100
+    nstep = 500
     times = np.linspace(0,tmax,nstep)
     n = 84
     x0 = (np.random.random((n,3)) - 0.5)/2
@@ -246,7 +246,7 @@ def main():
         # rk4_all += [rk4_xvals.T]
         midpoint_all += [midpoint_xvals.T]
 
-    # lorenz rk4 animation
+    # thomas midpoint animation
     tail = 30
     usetail = False
     def update(frame,linedata,lines):
@@ -292,7 +292,7 @@ def main():
 
     # TODO: create strange attractor class that takes a type and parameter list
     # TODO: create ODESolver class to solve and visualize/plot/animate solutions
-    # TODO: create ODEAnimator class to (optionally) solve an ode and animate it using plot/scatter/tails/etc.
+    # TODO: create ODEAnimator class to (optionally) solve an ode and animate it using plot/scatter/tails/etc
 
 if __name__ == '__main__':
     # A = np.array([[-1,0],[0,1]]) # saddle
