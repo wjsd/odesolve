@@ -212,7 +212,7 @@ if __name__ == "__main__":
 
     # system setup
     fps = 30
-    seconds = 5
+    seconds = 28
     nframes = round(fps*seconds)
     nsolves = nframes
     times = np.linspace(0,seconds,nsolves)
