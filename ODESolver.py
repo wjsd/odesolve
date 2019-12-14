@@ -25,7 +25,7 @@ class ODESolver():
 
     A class to solve and animate (non)autnomomous (non)linear systems of ODEs.
     """
-    def __init__(self,times,x0,dynamics,stepfunc=odesolve.midpoint_step,solver=odesolve.odesolve,showparticles=True,tail=None,nframes=None,interval=10,blit=False,xlim=None,ylim=None,zlim=None,save=False,fn='ode.mp4'):
+    def __init__(self,times,x0,dynamics,stepfunc=odesolve.midpoint_step,solver=odesolve.odesolve,showparticles=True,tail=None,nframes=None,interval=10,blit=False,xlim=None,ylim=None,zlim=None):
         """
         __init__
 
@@ -46,8 +46,6 @@ class ODESolver():
         xlim - (list or None) x-axis limits if not None, else use pyplot defaults (default:None)
         ylim - (list or None) y-axis limits if not None, else use pyplot defaults (default:None)
         zlim - (list or None) z-axis limits if not None, else use pyplot defaults (default:None)
-        save - (bool) save animation if True
-        fn - (str) filename to save animation if save is True
         """
         # solution params
         self.times = times
@@ -67,9 +65,6 @@ class ODESolver():
         self.ylim = ylim
         self.zlim = zlim
 
-        # save
-        self.save = save
-
         return
 
     def solve(self):
@@ -85,11 +80,16 @@ class ODESolver():
 
         return self.solutions
 
-    def animate(self):
+    def animate(self,fps=60,nframes=None,filename=None):
         """
         animate
 
         Animate the ODE.
+
+        inputs:
+            fps - (int) frames per second
+            nframes - (int) number of frames to play
+            filename - (str) name to save animation as
         """
         # make sure that solutions can be plotted
         dims = [s.shape[0] for s in self.solutions]
@@ -109,16 +109,18 @@ class ODESolver():
         if self.showparticles:
             self.scatters = [ax.scatter([],[],[]) for ld in self.solutions]
 
-        self.anim = animation.FuncAnimation(fig,self.update,len(self.times),fargs=(self.solutions,lines),interval=self.interval,blit=self.blit)
-        plt.show()
+        frames = nframes if nframes is not None else len(self.times)
+        self.anim = animation.FuncAnimation(fig,self.update,frames,fargs=(self.solutions,lines),interval=self.interval,blit=self.blit)
+        if filename is not None:
+            Writer = animation.FFMpegWriter(fps=fps,codec='libx264', extra_args=['-pix_fmt', 'yuv420p', '-profile:v', 'high', '-tune', 'animation', '-crf', '18'])
+            # writer = Writer(fps=fps, metadata=dict(artist='Me'), bitrate=1800)
 
-        if self.save:
-            Writer = animation.writers['ffmpeg']
-            writer = Writer(fps=15, metadata=dict(artist='Me'), bitrate=1800)
+            self.anim.save(filename,writer=Writer)
+            print("Animation saved as {}".format(filename))
+        else:
+            plt.show()
 
-            anim.save(fn,writer=Writer)
 
-        return self.anim
 
     def update(self,frame,linedata,lines):
         """
@@ -177,38 +179,42 @@ class ODESolver():
 # Run as program
 #
 if __name__ == "__main__":
-    # linear
-    times = np.linspace(0,10,500)
-    x0 = (np.random.random((40,3)) - 0.5)*8
-    xlim = [-15,15]
-    ylim=xlim
-    zlim=ylim
-    A = np.array([[-1.,1.,0.],[-1.,-1.,0.],[0.,0.,1.]])
-    dynamics = lambda t,x: A.dot(x)
-    s = ODESolver(times,x0,dynamics,stepfunc=odesolve.rk4_step,xlim=xlim,ylim=ylim,zlim=zlim)
-    solutions = s.solve()
-    a = s.animate()
-
-    # thomas
-    times = np.linspace(0,40,500)
-    x0 = (np.random.random((40,3)) - 0.5)*2
-    xlim = [-4,4]
-    ylim=xlim
-    zlim=ylim
-    dynamics = lambda t,x:odesolve.thomas(0.2,t,x)
-    s = ODESolver(times,x0,dynamics,xlim=xlim,ylim=ylim,zlim=zlim,showparticles=False,blit=True)
-    solutions = s.solve()
-    a = s.animate()
+    # # linear
+    # times = np.linspace(0,10,500)
+    # x0 = (np.random.random((40,3)) - 0.5)*8
+    # xlim = [-15,15]
+    # ylim=xlim
+    # zlim=ylim
+    # A = np.array([[-1.,1.,0.],[-1.,-1.,0.],[0.,0.,1.]])
+    # dynamics = lambda t,x: A.dot(x)
+    # s = ODESolver(times,x0,dynamics,stepfunc=odesolve.rk4_step,xlim=xlim,ylim=ylim,zlim=zlim)
+    # solutions = s.solve()
+    # a = s.animate()
+    #
+    # # thomas
+    # times = np.linspace(0,40,500)
+    # x0 = (np.random.random((40,3)) - 0.5)*2
+    # xlim = [-4,4]
+    # ylim=xlim
+    # zlim=ylim
+    # dynamics = lambda t,x:odesolve.thomas(0.2,t,x)
+    # s = ODESolver(times,x0,dynamics,xlim=xlim,ylim=ylim,zlim=zlim,showparticles=False,blit=True)
+    # solutions = s.solve()
+    # a = s.animate()
 
     # lorenz
-    times = np.linspace(0,40,2000)
+    fps = 60
+    seconds = 10
+    nframes = fps*seconds
+    nsolves = 1200
+    times = np.linspace(0,seconds,nsolves)
     x0 = (np.random.random((40,3)) - 0.5)*8
     xlim = [-15,15]
     ylim=xlim
     zlim=ylim
     dynamics = lambda t,x:odesolve.lorenz(10,28,8./3,t,x)
-    s = ODESolver(times,x0,dynamics,stepfunc=odesolve.rk4_step,xlim=xlim,ylim=ylim,zlim=zlim,showparticles=False,blit=True)
+    s = ODESolver(times,x0,dynamics,stepfunc=odesolve.rk4_step,xlim=xlim,ylim=ylim,zlim=zlim,showparticles=True,blit=False)
     solutions = s.solve()
-    a = s.animate()
+    a = s.animate(fps=fps,nframes=nframes,filename="testanimation.mp4")
 
     print('[ ODESolver.py testing complete ]')
