@@ -12,6 +12,10 @@ Notes:
 - If you want to plot a 2D ODE, set dynamics so that z = 0 always. You can also
   manually set your solution data by using the .set_solutions(sol) method.
 
+TODO:
+
+- Add 2D Animation (set view angle down z-axis?
+
 """
 import numpy as np
 import matplotlib.pyplot as plt
@@ -80,7 +84,7 @@ class ODESolver():
 
         return self.solutions
 
-    def animate(self,fps=60,nframes=None,filename=None):
+    def animate(self,fps=60,nframes=None,filename=None,camDist=10,camElev=10,camAzim=0.1):
         """
         animate
 
@@ -90,6 +94,9 @@ class ODESolver():
             fps - (int) frames per second
             nframes - (int) number of frames to play
             filename - (str) name to save animation as
+            camDist - (float) camera distance
+            camElev - (float) camera elevation
+            camAzim - (float) camera azimuth
         """
         # make sure that solutions can be plotted
         dims = [s.shape[0] for s in self.solutions]
@@ -99,6 +106,7 @@ class ODESolver():
 
         fig = plt.figure(figsize=(16,16))
         ax = Axes3D(fig)
+        ax.view_init(elev=camElev,azim=camAzim)
 
         ax.set_xlim(self.xlim)
         ax.set_ylim(self.ylim)
@@ -202,19 +210,27 @@ if __name__ == "__main__":
     # solutions = s.solve()
     # a = s.animate()
 
-    # lorenz
-    fps = 60
-    seconds = 10
-    nframes = fps*seconds
-    nsolves = 1200
+    # system setup
+    fps = 30
+    seconds = 5
+    nframes = round(fps*seconds)
+    nsolves = nframes
     times = np.linspace(0,seconds,nsolves)
     x0 = (np.random.random((40,3)) - 0.5)*8
-    xlim = [-15,15]
+
+    # view settings
+    xlim = [-8,8]
     ylim=xlim
     zlim=ylim
-    dynamics = lambda t,x:odesolve.lorenz(10,28,8./3,t,x)
-    s = ODESolver(times,x0,dynamics,stepfunc=odesolve.rk4_step,xlim=xlim,ylim=ylim,zlim=zlim,showparticles=True,blit=False)
+    camDist = 2
+    camElev = 20
+    camAzim = 10
+
+    # solve and animate
+    dynamics = lambda t,x:odesolve.thomas(0.2,t,x)
+    # dynamics = lambda t,x:odesolve.lorenz(10,28,8./3,t,x)
+    s = ODESolver(times,x0,dynamics,stepfunc=odesolve.rk4_step,xlim=xlim,ylim=ylim,zlim=zlim,showparticles=True,blit=False,tail=None)
     solutions = s.solve()
-    a = s.animate(fps=fps,nframes=nframes,filename="testanimation.mp4")
+    a = s.animate(fps=fps,nframes=nframes,filename="thomas.mp4")
 
     print('[ ODESolver.py testing complete ]')
