@@ -177,9 +177,9 @@ def main():
     A = np.array([[-1.5,2],[-1,1]]) # stable spiral
     lin = lambda t,x: linear(A,t,x)
     for i in range(x0.shape[0]):
-        euler_xvals = odesolve(times,x0[i,:],linear,euler_step)
-        midpoint_xvals = odesolve(times,x0[i,:],linear,midpoint_step)
-        rk4_xvals = odesolve(times,x0[i,:],linear,rk4_step)
+        euler_xvals = odesolve(times,x0[i,:],lin,euler_step)
+        midpoint_xvals = odesolve(times,x0[i,:],lin,midpoint_step)
+        rk4_xvals = odesolve(times,x0[i,:],lin,rk4_step)
 
         plt.plot(euler_xvals[:,0],euler_xvals[:,1],color='blue')
         plt.plot(midpoint_xvals[:,0],midpoint_xvals[:,1],color='green')
