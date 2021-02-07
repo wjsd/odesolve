@@ -117,7 +117,7 @@ def exp_decay(t,x):
 def exp_growth(t,x):
     return x
 
-def linear(t,x):
+def linear(A,t,x):
         return A.dot(x)
 
 def lorenz(sigma,rho,beta,t,x):
@@ -174,6 +174,8 @@ def main():
     # linear system
     n = 4
     x0 = (np.random.random((n,2)) - 0.5)*4
+    A = np.array([[-1.5,2],[-1,1]]) # stable spiral
+    lin = lambda t,x: linear(A,t,x)
     for i in range(x0.shape[0]):
         euler_xvals = odesolve(times,x0[i,:],linear,euler_step)
         midpoint_xvals = odesolve(times,x0[i,:],linear,midpoint_step)
@@ -295,7 +297,5 @@ def main():
     # TODO: create ODEAnimator class to (optionally) solve an ode and animate it using plot/scatter/tails/etc
 
 if __name__ == '__main__':
-    # A = np.array([[-1,0],[0,1]]) # saddle
-    A = np.array([[-1.5,2],[-1,1]]) # stable spiral
     main()
     print('[ odesolve.py testing complete ]')
