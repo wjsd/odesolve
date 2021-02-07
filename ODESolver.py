@@ -69,13 +69,13 @@ class ODESolver():
         self.ylim = ylim
         self.zlim = zlim
 
-        return
-
     def solve(self):
         """
         solve
 
         Solve the ODE.
+        
+        returns: self.solutions (list) - list of solution trajectories of the differential equation
         """
         self.solutions = []
         for i in range(self.x0.shape[0]): # find trajectories of each particle
@@ -134,7 +134,8 @@ class ODESolver():
         """
         update
 
-        Update function for animation frames.
+        Update function for animation frames. Used as input for matplotlib FuncAnimation.
+        See matplotlib FuncAnimation documentation for more information.
 
         inputs
         -------
